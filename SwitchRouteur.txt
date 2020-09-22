@@ -1,0 +1,207 @@
+############################################################################## Réseau
+			1. Commandes de base du commutateur
+> enable						= pour accéder au mode privilège
+# conf t						= pour accéder au mode privilège
+# enable password					= achanger le mot de passe
+# hostname	 					= changer l'hostname
+# no ip domain-lookup					= désactive les requêtes dns lors d'une mauvaise commande
+# line con 0						= accéder au mode configuration console
+# logging synchronous 					= empèche les messages de console d'interrompre les commandes
+(config)# int S0/1					= Entrer dans la configuration de l'interface S0/1
+# ping 10.10.10.10					= faire un ping
+# traceroute 10.10.10.10 source 12.12.12.12		= faire un traceroute
+
+
+			2. Configuration des vlan
+(config)# vlan 2					= Créer/modifier le vlan numéro 2
+(config-vlan)# name management				= Modifie le nom du vlan en management
+(config)# no vlan 2					= supprime le vlan 2
+---
+(config-if)# switchport mode access			= Spécifie le mode de l'interface (désactive la negociation trunk)
+(config-if)# switchport access vlan 2			= Affecte le port au vlan 2
+---
+(config-if)# switchport trunk encapsulation dot1q	= seulement pour 3560
+(config-if)# switchport mode trunk			= Affecte le port à tout les vlan
+
+
+			3. Configuration de base
+(config-if)# ip address 10.10.10.10 255.255.255.0	= affecte l'adresse à l'interface
+(config-if)# no sh					= active l'interface
+(config)# ip default-gateway 10.0.0.1			= Affecte une passerelle par défaut au commutateur
+(config)# ip name-server 10.0.0.10			= Affecte l'adresse IP du serveur DNS
+(config)# ip routing					= Active le routage (sur 3560)
+(config-if)# ip helper-address 10.10.10.3		= Spécifier l'adresse du DHCP sur une interface
+(config)# cdp run					= active le cdp (normalement déjà activé)
+
+
+			4. Config de route 
+(config)# ip route 10.10.10.0 255.255.255.0 10.10.10.1	= Route statique vers le réseau 10.10.10.0 en passant par 10.10.10.1
+(config)# ip route 0.0.0.0 0.0.0.0 InterfaceSortie AdressePasserelle	= route par défaut
+
+
+			5. Config interface série
+(config-if)# clock rate 128000				= Seulement sur une connection DCE
+(config-if)# bandwidth 28				= Limite la bande passante à 28 kbps
+
+
+			6. Serveur DHCP
+(config)# ip dhcp pool pool-name			= Créer un pool dhcp pool-name
+(dhcp-config)# network 10.10.0.0 255.255.0.0		= définir la plage d'adresse disponible
+(dhcp-config)# default-router 10.10.0.2			= Définir l'adresse IP de la passerelle par défaut
+(dhcp-config)# dns-server 10.10.0.3			= définir l'adresse IP du serveur dNS
+(dhcp-config)# domain-name huss.net			= définir le nom de domaine
+(config)# no service dhcp				= désactive le service DHCP
+
+
+			7. OSPF
+(config)# router ospf 1					= Active OSPF et définit son processus sur 1 (son ID en quelques sortes)
+(config-router)# router-id 1.1.1.1			= définir l'id du routeur à 1.1.1.1
+(config-router)# network 172.16.0.0 0.0.255.255 area 0	= Redistribue le réseau de l'area 0 (le réseau est connecté directement)
+(config-router)# passive-interface g0/0			= Interdire les annonces OSPF sur l'interface g0/0
+(config)# clear ip ospf process				= réinitialiser le processus ospf
+auto-cost reference-bandwidth Mbit/s			= Modifier la bande passante de référence par défaut
+(config-if)# ip ospf cost value 20			= modifie le cout OSPF d'une interface
+(config-if)# ip ospf network point-to-point		= modifie l'interface pour être en point-to-point (cela evite d'annoncer la route en /32)
+(config-if)# ip ospf 10 area 0				= met l'interface dans l'ospf 10 area 0
+
+
+			8. RIP
+(config)# router rip					= Active la diffusion RIP de ce réseau et l'écoute sur l'interface correspondante (réseau directement connecté)
+(config-router)# version 2				= active la version 2 de RIP
+(config-router)# network 10.10.10.0			= Redistribue le réseau 10.10.10.0 (qui est directement connecté)
+(config-router)# redistribute connected			= Annonce dans RIP tous les autres réseaux directement connectés du routeur.
+(config-router)# passive-interface g0/0			= interdit les annonces RIP sur l'interface g0/0
+(config)# no router rip					= désactive le routage RIP (efface toutes les configurations RIP existantes)
+
+
+			9. Sous-interface
+(config)# interface g0/0.10				= Définir la sous-interface 10 de l'interface g0/0
+(config-subif)# encapsulation dot1q 15			= Associer la sous interface au vlan 15
+
+
+			10. AgregaLien
+(config)# int port-channel 1				= définir l'interface logique 1
+(config-if)# channel-group 1 mode on			= associe l'interface a l'interface logique 1
+
+
+			11. Sécuriser Ports
+(config-if)# switchport port-security			= activer le controle d'accès du port sur l'interface
+(config-if)# switchport port-security mac-address @MAC_autorisée	= controle d'accès en définissant l'adresse mac autorisée manuellement
+(config-if)# switchport port-security mac-address sticky	= Controle d'accès en définissant l'adresse mac automatiquement à partir des trames qui circulent.
+(config-if)# switchport port-security maximum nombre_maximum	= Définir le nombre d'adress qui peuvent accéder au port
+# clear port-security all				= effacer la table des adresses mac autorisées
+--- En cas d'accès illicite d'adresse mac (accès d'une mac non autorisées a l'interface), plusieurs politiques de sécurité peuvent être envisagées :
+(config-if)# switchport port-security violation shutdown	= le port est désactivé
+(config-if)# switchport port-security violation protect		= le port ne se bloque pas mais seule les trames avec des adresse MAC non connues sont bloquées
+(config-if)# switchport port-security violation restrict	= alerte dans le syslog et via SNMP / compteur du nombre de violation est incrémenté
+---
+# ip dhcp snooping					= Activez la surveillance DHCP
+# ip dhcp snooping vlan 10				= activez la surveillance DHCP pour le vlan 10
+(config-if)# ip dhcp snooping limit rate fréquence	= limiter la fréquence des requetes dhcp au serveur dhcp via des ports non fiable
+
+
+			12. ACL
+(config)# access-list 1 permit 10.0.0.0 0.255.255.255	= autoriser que le trafic issu du réseau 10.0.0.0/8 avec l'access-list 1
+--- bloquer tous les paquets de 172.16.3.10 et autoriser le reste
+(config)# access-list 1 deny 172.16.3.10 0.0.0.0
+(config)# access-list 1 permit 0.0.0.0 255.255.255.255
+---
+(config)# no access-list 1				= supprime l'access-list 1
+(config-if)# ip access-group 10 in			= associe l'access-list 10 en entrée sur l'interface
+(config-if)# ip access-group 10 out			= associe l'access-list 10 en sortie sur l'interface
+(config)# access-list 101 deny ip any host 10.1.1.1	= Bloquer des paquets IP a destination de la machine 10.1.1.1 et provenant de n'importe quelle source avec l'ACM étendue 101
+(config)# access-list 102 deny tcp any host 10.1.1.1 eq www	= bloquer des paquets TCP a destination du port 80 de la machine 10.1.1.1
+--- Autorise le réseau visiteur (192.168.150.0/24) à interroger le serveur DNS (172.16.0.10)
+(config)# access-list 101 permit udp 192.168.150.0 0.0.0.255 host 172.16.0.10 eq domain
+(config)# access-list 101 permit udp host 172.16.0.10 eq domain 192.168.150.0 0.0.0.255
+---
+--- Autorise le réseau visiteur (192.168.150.0/24) à interroger le serveur DHCP (172.16.0.10)
+(config)# access-list 101 permit udp 192.168.150.0 0.0.0.255 eq bootpc host 172.16.0.10 eq bootps
+(config)# access-list 101 permit udp host 172.16.0.10 eq bootps 192.168.150.0 0.0.0.255 eq bootpc
+---
+--- Autorise le réseau visiteur (192.168.150.0/24) à interroger le serveur proxy (web) (172.18.0.2)
+(config)# access-list 101 permit tcp 192.168.150.0 0.0.0.255 host 172.18.0.2 eq www
+(config)# access-list 101 permit tcp host 172.18.0.2 192.168.150.0 0.0.0.255 established
+---
+(config)# access-list 101 permit icmp any any		= règle qui autorise tout le trafic icmp
+(config)# access-list 101 permit tcp any gt 1023 any eq 53	= règle qui autorise toutes requêtes DNS (gt 1023 signifie >1023).
+(config)# access-list 101 permit tcp any any established	= règle qui autorise tout le trafic tcp déjà établi (réponses à des requêtes TCP)
+
+
+			13. NatPat
+(config-if)# ip nat inside				= definir l'interface en privé
+(config-if)# ip nat outside				= definir l'interface en publique
+(config)# ip nat inside source list 10 interface s0/0/0 overload	= Definition du NAT
+(config)# ip nat inside source static 10.0.0.10 80.0.0.10	= tout le trafic a destination de l'adresse publique 80.0.0.10 est redirigé vers l'adresse privée 10.0.0.10
+(config)# ip nat inside source static tcp 10.0.0.10 80 80.0.0.10 80	= Le trafic a destination de 80.0.0.10 avec le port 80 est redirigé vers l'adresse privée 10.0.0.10 avec le port 80.
+(config)#ip nat pool name start-ip end-ip netmask netmask	= Définition du pool d’adresses publiques
+(config)#ip nat inside source list access-list_number pool name_pool	= Relier le pool d’adresses publiques à l’ACL
+#clear ip nat translation *				= effacer les translations
+
+
+			14. HSRP
+(config-if)# standby group-number ip AdresseIp		= Active HSRP avec le groupe group-number et définit l'adresse IP virtuelle AdresseIP
+(config-if)# standby group-number priority ValeurPriorité	= définit un niveau de priorité de l'interface
+(config-if)# standby group-number preempt		= active le routeur en fonction du niveau de priorité
+(config-if)# standby group-number track Interface	= pour ce groupe, Interface est surveillée
+
+
+
+			15. EIGRP
+(config)# routeur eigrp 1				= active l'EIGRP avec l'ID 1
+(config-router)# no auto-summary			= désactive la summarization automatique 
+(config-router)# network 172.16.0.0 0.0.255.255		= Ajout du réseau 172.16.0.0 dans EIGRP 1 (seulement les réseaux connectés directement)
+(config-if)# ip summary-address eigrp 1 192.168.48.0 255.255.255.0	= ajoute le réseau de l'interface dans EIGRP 1 
+
+
+X. La commande show
+# show ip dhcp binding					= permet d'afficher la liste de toutes les liaisons entre adresse IPv4 et adresse MAC qui ont été fournies par le service DHCPv4.
+# show ip dhcp server statistics 			= sert à vérifier que les messages sont reçus ou envoyés par le routeur. Cette commande permet d'afficher le nombre de messages DHCPv4 envoyés et reçus.
+# show ip dhcp conflict 				= affiche tous les conflits d'adresses enregistrés par le serveur DHCPv4.
+# show run						= voir la configuration active
+# show ip interface brief 				= pour voir un état récapitulatif des interfaces
+# show ip interface g0/0 				= pour voir un état complet de l’interface g0/0
+# show interfaces 					= pour voir un état complet des interfaces
+# sh ip route 						= pour afficher la table de routage
+# sh ip route static 					= pour afficher les routes statiques
+# sh ip route connected 				= pour afficher la table de routage
+# sh ip route rip 					= pour afficher les routes dynamiques RIP
+# sh ip route eigrp					= pour afficher les routes dynamiques EIGRP
+# sh ip route ospf					= pour afficher les routes dynamiques OSPF
+# show vlan						= Afficher les vlan avec les interfaces (ports) affectés (sauf ports trunk)
+# sh ip rip						= affiche les informations sur la configuration du routage RIP
+# sh ip ospf						= affiche les information sur la configuration du routage OSPF
+# sh ip ospf database					= affiche la database d'ospf
+# sh ip ospf neighbor 					= pour voir les routeurs voisins
+# sh etherchannel port-channel				= afficher les informations sur les interfaces logiques
+# sh mac-address-table					= affiche la table d'adresse mac
+# show port-security interface nom_interface		= afficher la securité du port
+# show port-security address				= afficher la table des adresses mac autorisées
+# show cdp neighbors					= afficher les voisins
+# show access-lists 					= affiche toutes les listes de contrôle d’accès
+# show access-lists 10 					= affiche la liste de contrôle d’accès numéro 10
+# show ip nat translation				= Afficher les translations
+# show ip nat statistics				= Afficher les statistiques sur les translations
+# show standby						= affiche la configuration HSRP du routeur
+# show ip eigrp neighbors				= affiche les voisins eigrp
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
