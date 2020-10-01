@@ -1,20 +1,17 @@
-# Configuration commutateur et routeur
-
-## Commandes de base du commutateur
-```bash
-> enable										= pour accéder au mode privilège
-# conf t										= pour accéder au mode privilège
-# enable password class							= Mettre un mot de passe "class" à l'enable
-# hostname	 									= changer l'hostname
-# no ip domain-lookup							= désactive les requêtes dns lors d'une mauvaise commande
-# line con 0									= accéder au mode configuration console
-# logging synchronous 							= empèche les messages de console d'interrompre les commandes
-(config)# int S0/1								= Entrer dans la configuration de l'interface S0/1
-# ping 10.10.10.10								= faire un ping
+############################################################################## Réseau
+			1. Commandes de base du commutateur
+> enable						= pour accéder au mode privilège
+# conf t						= pour accéder au mode privilège
+# enable password class					= Mettre un mot de passe "class" à l'enable
+# hostname	 					= changer l'hostname
+# no ip domain-lookup					= désactive les requêtes dns lors d'une mauvaise commande
+# line con 0						= accéder au mode configuration console
+# logging synchronous 					= empèche les messages de console d'interrompre les commandes
+(config)# int S0/1					= Entrer dans la configuration de l'interface S0/1
+# ping 10.10.10.10					= faire un ping
 # traceroute 10.10.10.10 source 12.12.12.12		= faire un traceroute
-# service password-encryption					= chiffrer les mots de passes
-# banner motd # Welcome #						= Mettre la bannière Welcome
-```
+# service password-encryption				= chiffrer les mots de passes
+# banner motd # Welcome #				= Mettre la bannière Welcome
 
 
 			2. Configuration des vlan
