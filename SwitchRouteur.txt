@@ -9,6 +9,7 @@
 # logging synchronous 					= empèche les messages de console d'interrompre les commandes
 (config)# int S0/1					= Entrer dans la configuration de l'interface S0/1
 # ping 10.10.10.10					= faire un ping
+# ping 10.10.10.10 source 172.16.0.2			= faire un ping en précisant une interface (172.16.0.2 içi)
 # traceroute 10.10.10.10 source 12.12.12.12		= faire un traceroute
 # service password-encryption				= chiffrer les mots de passes
 # banner motd # Welcome #				= Mettre la bannière Welcome
@@ -159,7 +160,12 @@ auto-cost reference-bandwidth Mbit/s			= Modifier la bande passante de référen
 (config)# router bgp 300				= active le BGP avec comme ID d'AS 300
 (config-router)# neighbor 192.168.1.6 remote-as 100	= on indique que l'interface d'enface (192.168.1.6) est dans l'AS 100
 (config-router)# network 10.1.1.0 mask 255.255.255.0	= on indique un réseau local (directement connecté) dans le BGP
-			
+(config-router)# neighbor 192.168.1.6 remove-private-as	= pour l'hôte 192.168.1.6, on masque l'AS final à qui il enverra des paquets.
+(config-router)# neighbor 172.24.1.18 filter-list 1 out	= Appliquer une ACL en destination de l'hôte 172.24.1.18 pour tout les paquets sortant de nous.
+--- bloquer tout les paquets provenant de l'AS 100 et autoriser le reste
+(config)# ip as-path access-list 1 deny ^100$
+(config)# ip as-path access-list 1 permit .*
+---
 			
 			
 			
@@ -194,6 +200,7 @@ X. La commande show
 # show standby						= affiche la configuration HSRP du routeur
 # show ip eigrp neighbors				= affiche les voisins eigrp
 # show ip bgp neighbors					= affiche les voisins BGP
+# show ip bgp regexp ^100$				= Affiche si il y a un réseau qui a été bloqué par cette regex
 
 
 
