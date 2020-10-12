@@ -150,13 +150,15 @@ auto-cost reference-bandwidth Mbit/s			= Modifier la bande passante de référen
 
 
 			15. EIGRP
-(config)# routeur eigrp 1				= active l'EIGRP avec l'ID 1
+(config)# router eigrp 1				= active l'EIGRP avec l'ID 1
 (config-router)# no auto-summary			= désactive la summarization automatique 
 (config-router)# network 172.16.0.0 0.0.255.255		= Ajout du réseau 172.16.0.0 dans EIGRP 1 (seulement les réseaux connectés directement)
 (config-if)# ip summary-address eigrp 1 192.168.48.0 255.255.255.0	= ajoute le réseau de l'interface dans EIGRP 1 
 
 			16. BGP
-			
+(config)# router bgp 300				= active le BGP avec comme ID d'AS 300
+(config-router)# neighbor 192.168.1.6 remote-as 100	= on indique que l'interface d'enface (192.168.1.6) est dans l'AS 100
+(config-router)# network 10.1.1.0 mask 255.255.255.0	= on indique un réseau local (directement connecté) dans le BGP
 			
 			
 			
@@ -191,6 +193,7 @@ X. La commande show
 # show ip nat statistics				= Afficher les statistiques sur les translations
 # show standby						= affiche la configuration HSRP du routeur
 # show ip eigrp neighbors				= affiche les voisins eigrp
+# show ip bgp neighbors					= affiche les voisins BGP
 
 
 
