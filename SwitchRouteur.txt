@@ -155,7 +155,12 @@ auto-cost reference-bandwidth Mbit/s			= Modifier la bande passante de référen
 (config-router)# network 172.16.0.0 0.0.255.255		= Ajout du réseau 172.16.0.0 dans EIGRP 1 (seulement les réseaux connectés directement)
 (config-if)# ip summary-address eigrp 1 192.168.48.0 255.255.255.0	= ajoute le réseau de l'interface dans EIGRP 1 
 
-
+			16. BGP
+			
+			
+			
+			
+			
 X. La commande show
 # show ip dhcp binding					= permet d'afficher la liste de toutes les liaisons entre adresse IPv4 et adresse MAC qui ont été fournies par le service DHCPv4.
 # show ip dhcp server statistics 			= sert à vérifier que les messages sont reçus ou envoyés par le routeur. Cette commande permet d'afficher le nombre de messages DHCPv4 envoyés et reçus.
