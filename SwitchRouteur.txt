@@ -166,7 +166,11 @@ auto-cost reference-bandwidth Mbit/s			= Modifier la bande passante de référen
 (config)# ip as-path access-list 1 deny ^100$
 (config)# ip as-path access-list 1 permit .*
 ---
-			
+			17. VRF
+(config)# ip vrf CUSTOMER				= Créer le vrf CUSTOMER
+(config-vrf)# rd 100:1					= 100 correspond à l'AS et 1 à un identifiant
+(config-vrf)# route-target both 1:100			= importe et exporte les routes pour 1:100
+(config-if)# ip vrf forwarding CUSTOMER			= met l'interface dans le vrf CUSTOMER (ceci supprime l'adresse ip, donc il faut la remettre après)
 			
 			
 X. La commande show
